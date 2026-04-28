@@ -1,0 +1,75 @@
+name: Daily data update
+
+# Runs daily at 07:00 UTC (09:00 CEST / 08:00 CET)
+# Also triggerable manually from the Actions tab
+#
+# FIRST-TIME SETUP (run once from your local machine):
+#   gh release create data-snapshot --title "Raw donations snapshot" --prerelease
+#   gh release upload data-snapshot /path/to/latwogang_wplaty.json
+#
+# After that this workflow handles everything automatically.
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download raw donations JSON from release
+        run: |
+          gh release download data-snapshot \
+            --pattern "latwogang_wplaty.json" \
+            --dir "$GITHUB_WORKSPACE/.."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch new donations (incremental)
+        run: |
+          python3 update_donations.py
+          echo "Records after update:"
+          python3 -c "
+          import json
+          with open('../latwogang_wplaty.json') as f:
+              d = json.load(f)
+          print(f'  {len(d):,} records, newest: {d[0][\"data\"][:19]}')
+          "
+
+      - name: Regenerate dashboard data files
+        run: python3 preprocess.py
+
+      - name: Upload updated raw JSON back to release
+        run: |
+          gh release upload data-snapshot \
+            "$GITHUB_WORKSPACE/../latwogang_wplaty.json" \
+            --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit updated data & dashboard
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ index.html
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            COUNT=$(python3 -c "import json; d=json.load(open('data/stats.json')); print(f\"{d['total_payments']:,}\")")
+            AMOUNT=$(python3 -c "import json; d=json.load(open('data/stats.json')); print(f\"{d['total_amount_pln']/1e6:.2f}M PLN\")")
+            git commit -m "chore: daily update $(date -u +%Y-%m-%d) — ${COUNT} wpłat, ${AMOUNT}"
+            git push
+          fi
