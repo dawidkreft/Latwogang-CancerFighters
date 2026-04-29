@@ -3,7 +3,7 @@
 An analytics dashboard for the **Łatwogang × Cancer Fighters** charity stream  
 (22–27 April 2026) — **3,199,026 donations · 217M PLN raised**.
 
-🌐 **Live:** [dawid-allegro.github.io/latwogang-dashboard](https://dawid-allegro.github.io/latwogang-dashboard/)
+🌐 **Live:** [dawidkreft.github.io/Latwogang-CancerFighters](https://dawidkreft.github.io/Latwogang-CancerFighters/)
 
 ---
 
