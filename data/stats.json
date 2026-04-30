@@ -1,11 +1,11 @@
 {
-  "total_payments": 3215423,
-  "total_amount_pln": 221298622.63,
-  "named_count": 2022191,
-  "anon_count": 1193232,
-  "comment_count": 1030286,
-  "company_count": 1071,
-  "unique_named_persons": 600855,
+  "total_payments": 3230180,
+  "total_amount_pln": 223255239.55,
+  "named_count": 2030572,
+  "anon_count": 1199608,
+  "comment_count": 1033756,
+  "company_count": 1092,
+  "unique_named_persons": 602927,
   "date_first": "2026-04-22T22:50:08.575000+02:00",
-  "date_last": "2026-04-29T09:45:13.138000+02:00"
+  "date_last": "2026-04-29T20:11:41.011000+02:00"
 }
